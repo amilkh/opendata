@@ -2,7 +2,28 @@ import csv
 import json
 import os
 import codecs
+import shutil
 from datetime import datetime
+
+def convert_satisfaction_to_number(satisfaction_str):
+    """
+    満足度の文字列を数値に変換
+    とても満足=5, 満足=4, どちらでもない=3, 不満=2, とても不満=1
+    """
+    if not satisfaction_str or satisfaction_str.strip() == "":
+        return ""
+    
+    satisfaction_str = satisfaction_str.strip()
+    
+    satisfaction_mapping = {
+        "とても満足": 5,
+        "満足": 4,
+        "どちらでもない": 3,
+        "不満": 2,
+        "とても不満": 1
+    }
+    
+    return satisfaction_mapping.get(satisfaction_str, satisfaction_str)
 
 def format_date_string(date_str):
     """
@@ -112,9 +133,28 @@ def check_information_source_flags(information_source):
     
     return result
 
+def copy_toyama_csv():
+    """
+    toyama.csvをtoyama_formatted.csvとしてコピー
+    """
+    source_file = "input/toyama/toyama.csv"
+    target_file = "input/toyama/toyama_formatted.csv"
+    
+    try:
+        if os.path.exists(source_file):
+            shutil.copy2(source_file, target_file)
+            print(f"ファイルコピー完了: {source_file} -> {target_file}")
+            return True
+        else:
+            print(f"ソースファイルが見つかりません: {source_file}")
+            return False
+    except Exception as e:
+        print(f"ファイルコピーエラー: {e}")
+        return False
+
 def convert_toyama_csv():
     # ファイルパス
-    input_csv = "input/toyama/toyama.csv"
+    input_csv = "input/toyama/toyama_formatted.csv"
     mapping_json = "input/toyama/column_mapping_toyama.json"
     output_csv = "output/toyama/toyama_converted.csv"
     
@@ -165,6 +205,25 @@ def convert_toyama_csv():
                     # 該当するフラグの値を設定
                     value = flags.get(header, 0)
                     output_row.append(value)
+                # 満足度項目の処理
+                elif header in ["交通の満足度", 
+                               "満足度（食べ物・料理）", "満足度（宿泊施設）", 
+                               "満足度（買い物（工芸品・特産品など））", "満足度買い物（観光・体験）", 
+                               "満足度（旅行全体）", "満足度（商品・サービス）"]:
+                    # マッピングから対応する入力項目名を取得
+                    input_field = mapping[header]
+                    
+                    if input_field == "":
+                        # マッピングが空文字の場合は空文字を出力
+                        output_row.append("")
+                    elif input_field in row:
+                        # 入力CSVに項目が存在する場合は満足度を数値に変換
+                        value = row[input_field]
+                        converted_value = convert_satisfaction_to_number(value)
+                        output_row.append(converted_value)
+                    else:
+                        # 入力CSVに項目が存在しない場合は空文字を出力
+                        output_row.append("")
                 else:
                     # マッピングから対応する入力項目名を取得
                     input_field = mapping[header]
@@ -190,5 +249,21 @@ def convert_toyama_csv():
     print(f"変換完了: {output_csv}")
     print(f"出力行数: {len(rows)}")
 
-if __name__ == "__main__":
+def main():
+    """
+    メイン処理
+    """
+    # ファイルコピーを実行
+    print("富山CSVファイルのコピーを開始します...")
+    if copy_toyama_csv():
+        print("富山CSVファイルのコピーが完了しました。")
+    else:
+        print("富山CSVファイルのコピーに失敗しました。")
+        return
+    
+    # CSV変換を実行
+    print("CSV変換を開始します...")
     convert_toyama_csv()
+
+if __name__ == "__main__":
+    main()

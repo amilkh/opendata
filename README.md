@@ -9,7 +9,7 @@
 ### 主な機能
 
 - **データ標準化**: 各県の異なる形式のCSVデータを統一された形式に変換
-- **列マッピング**: JSONファイルを使用した柔軟な列名マッピング
+- **列マッピング**: JSONファイルを使用した列名マッピング
 - **データ前処理**: 改行コードの正規化、会員IDの匿名化、日付形式の統一
 - **情報源フラグ生成**: 情報源データから各種メディア・チャネルのフラグを自動生成
 - **CSVマージ**: 変換されたデータを1つのファイルに統合
@@ -112,26 +112,26 @@ pip3 --version
 
 正常にバージョンが表示されれば、インストールは成功です。
 
-### 2. 入力データの配置
+### 2. 実行
 
-各県のCSVファイルと列マッピングJSONファイルを以下のように配置してください：
-
-- `input/toyama/toyama.csv` - 富山県のアンケートデータ
-- `input/toyama/column_mapping_toyama.json` - 富山県の列マッピング定義
-- `input/ishikawa/ishikawa.csv` - 石川県のアンケートデータ
-- `input/ishikawa/column_mapping_ishikawa.json` - 石川県の列マッピング定義
-- `input/fukui/fukui.csv` - 福井県のアンケートデータ
-- `input/fukui/column_mapping_fukui.json` - 福井県の列マッピング定義
-
-### 3. 実行
-
-以下のコマンドで変換とマージを一括実行します：
+ターミナルから、以下のコマンドで変換とマージを一括実行します：
 
 ```bash
 python merge_survey.py
 ```
 
-### 4. 個別実行
+ZIPファイルでダウンロードした場合は、そのZIPを解凍したディレクトリへ移動し実行します
+
+例）ZIPを解凍したディレクトリが、/Users/自身のユーザ名/Desktop/merged_survey_csv_py-mainの場合
+
+```bash
+# ディレクトリ移動
+cd /Users/自身のユーザ名/Desktop/merged_survey_csv_py-main
+# マージ一括実行
+python merge_survey.py
+```
+
+### 3. 個別実行
 
 各県のデータを個別に変換したい場合は、以下のコマンドを使用できます：
 
@@ -145,6 +145,18 @@ python convert_ishikawa.py
 # 福井県データの変換
 python convert_fukui.py
 ```
+
+### ※入力データを入れ替えたい時の配置
+
+各県のCSVファイルを入れ替えたい、または列マッピングを変更したい場合は各県のcolumn_mapping_xxxx.jsonファイルの内容を更新し、ファイルを以下のように配置してください：
+
+- `input/toyama/toyama.csv` - 富山県のアンケートデータ
+- `input/toyama/column_mapping_toyama.json` - 富山県の列マッピング定義
+- `input/ishikawa/ishikawa.csv` - 石川県のアンケートデータ
+- `input/ishikawa/column_mapping_ishikawa.json` - 石川県の列マッピング定義
+- `input/fukui/fukui.csv` - 福井県のアンケートデータ
+- `input/fukui/column_mapping_fukui.json` - 福井県の列マッピング定義
+
 
 ## データ変換の詳細
 
@@ -202,76 +214,3 @@ python convert_fukui.py
 ## ライセンス
 
 このプロジェクトはMITライセンスの下で公開されています。
-
-## 使用されているモジュール
-
-### 標準ライブラリ（追加インストール不要）
-- `csv` - CSVファイルの読み書き
-- `json` - JSONファイルの処理
-- `os` - オペレーティングシステム機能
-- `codecs` - エンコーディング処理
-- `re` - 正規表現
-- `datetime` - 日付・時刻処理
-- `sys` - システム固有のパラメータ
-- `subprocess` - サブプロセス実行
-- `pathlib` - パス操作
-- `typing` - 型ヒント
-
-## インストールされていない場合のエラーメッセージ
-
-**良いニュース**: このプロジェクトで使用しているすべてのモジュールは**Python標準ライブラリ**に含まれているため、追加でインストールする必要はありません。
-
-ただし、以下のような状況でエラーが発生する可能性があります：
-
-### 1. Python 3.6未満の場合
-
-`pathlib`と`typing`はPython 3.4以降で標準ライブラリに含まれていますが、古いバージョンでは以下のようなエラーが表示されます：
-
-```bash
-# Python 3.5以下で実行した場合
-ImportError: No module named 'pathlib'
-ImportError: No module named 'typing'
-```
-
-### 2. 破損したPython環境の場合
-
-標準ライブラリが破損している場合：
-
-```bash
-ImportError: No module named 'csv'
-ImportError: No module named 'json'
-```
-
-### 3. 実行時のエラーメッセージ例
-
-実際にモジュールが見つからない場合、以下のようなエラーメッセージが表示されます：
-
-```bash
-Traceback (most recent call last):
-  File "merge_survey.py", line 12, in <module>
-    from pathlib import Path
-ImportError: No module named 'pathlib'
-```
-
-## 推奨事項
-
-README.mdに以下の情報を追加することをお勧めします：
-
-```markdown
-### 必要な環境
-
-- **Python 3.6以上**（推奨: Python 3.8以上）
-- すべての必要なモジュールはPython標準ライブラリに含まれているため、追加インストールは不要です
-
-### トラブルシューティング
-
-#### ImportErrorが発生する場合
-
-1. Pythonのバージョンを確認：
-```bash
-python --version
-```
-
-2. Python 3.6以上であることを確認してください。古いバージョンの場合は、最新版にアップデートしてください。
-
-3. Python環境が破損している可能性がある場合は、Pythonを再インストールしてください。

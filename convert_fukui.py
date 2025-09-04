@@ -21,8 +21,20 @@ def process_fukui_csv(input_file_path):
         if content_bytes.startswith(b'\xef\xbb\xbf'):
             content_bytes = content_bytes[3:]
         
-        # バイト列を文字列に変換
-        content = content_bytes.decode('utf-8')
+        # バイト列を文字列に変換（複数のエンコーディングを試す）
+        encodings = ['utf-8', 'shift_jis', 'cp932', 'euc-jp', 'iso-2022-jp']
+        content = None
+        
+        for encoding in encodings:
+            try:
+                content = content_bytes.decode(encoding)
+                print(f"エンコーディング検出: {encoding}")
+                break
+            except UnicodeDecodeError:
+                continue
+        
+        if content is None:
+            raise UnicodeDecodeError("すべてのエンコーディングでデコードに失敗しました")
         
         print(f"処理前のファイルサイズ: {len(content)} 文字")
         
@@ -47,16 +59,37 @@ def process_fukui_csv(input_file_path):
         print("CRLFの挿入完了")
         print(f"処理後のファイルサイズ: {len(content)} 文字")
         
-        # 修正した内容をファイルに書き戻し
-        with open(input_file_path, 'w', encoding='utf-8') as f:
+        # 修正した内容をフォーマット済みファイルに出力
+        formatted_file_path = input_file_path.replace('.csv', '_formatted.csv')
+        with open(formatted_file_path, 'w', encoding='utf-8') as f:
             f.write(content)
         
-        print(f"福井CSVファイルの前処理完了: {input_file_path}")
+        print(f"福井CSVファイルの前処理完了: {formatted_file_path}")
         return True
         
     except Exception as e:
         print(f"福井CSVファイル前処理エラー: {e}")
         return False
+
+def convert_satisfaction_to_number(satisfaction_str):
+    """
+    満足度の文字列を数値に変換
+    とても満足=5, 満足=4, どちらでもない=3, 不満=2, とても不満=1
+    """
+    if not satisfaction_str or satisfaction_str.strip() == "":
+        return ""
+    
+    satisfaction_str = satisfaction_str.strip()
+    
+    satisfaction_mapping = {
+        "とても満足": 5,
+        "満足": 4,
+        "どちらでもない": 3,
+        "不満": 2,
+        "とても不満": 1
+    }
+    
+    return satisfaction_mapping.get(satisfaction_str, satisfaction_str)
 
 def format_date_string(date_str):
     """
@@ -140,7 +173,7 @@ def check_information_source_flags(information_source):
 
 def convert_fukui_csv():
     # ファイルパス
-    input_csv = "input/fukui/fukui.csv"
+    input_csv = "input/fukui/fukui_formatted.csv"
     mapping_json = "input/fukui/column_mapping_fukui.json"
     output_csv = "output/fukui/fukui_converted.csv"
     
@@ -151,11 +184,25 @@ def convert_fukui_csv():
     # 出力用のヘッダー（JSONのキー順）
     output_headers = list(mapping.keys())
     
-    # 入力CSVを読み込み（BOMを自動除去）
-    with codecs.open(input_csv, 'r', encoding='utf-8-sig') as f:
-        reader = csv.DictReader(f)
-        input_headers = reader.fieldnames
-        rows = list(reader)
+    # 入力CSVを読み込み（複数のエンコーディングを試す）
+    encodings = ['utf-8-sig', 'utf-8', 'shift_jis', 'cp932', 'euc-jp', 'iso-2022-jp']
+    reader = None
+    input_headers = None
+    rows = None
+    
+    for encoding in encodings:
+        try:
+            with codecs.open(input_csv, 'r', encoding=encoding) as f:
+                reader = csv.DictReader(f)
+                input_headers = reader.fieldnames
+                rows = list(reader)
+            print(f"CSV読み込み成功 - エンコーディング: {encoding}")
+            break
+        except UnicodeDecodeError:
+            continue
+    
+    if reader is None:
+        raise UnicodeDecodeError("すべてのエンコーディングでCSVファイルの読み込みに失敗しました")
     
     # 出力CSVを作成
     with open(output_csv, 'w', encoding='utf-8', newline='') as f:
@@ -187,6 +234,25 @@ def convert_fukui_csv():
                     # 該当するフラグの値を設定
                     value = flags.get(header, 0)
                     output_row.append(value)
+                # 満足度項目の処理
+                elif header in ["交通の満足度", 
+                               "満足度（食べ物・料理）", "満足度（宿泊施設）", 
+                               "満足度（買い物（工芸品・特産品など））", "満足度買い物（観光・体験）", 
+                               "満足度（旅行全体）", "満足度（商品・サービス）"]:
+                    # マッピングから対応する入力項目名を取得
+                    input_field = mapping[header]
+                    
+                    if input_field == "":
+                        # マッピングが空文字の場合は空文字を出力
+                        output_row.append("")
+                    elif input_field in row:
+                        # 入力CSVに項目が存在する場合は満足度を数値に変換
+                        value = row[input_field]
+                        converted_value = convert_satisfaction_to_number(value)
+                        output_row.append(converted_value)
+                    else:
+                        # 入力CSVに項目が存在しない場合は空文字を出力
+                        output_row.append("")
                 else:
                     # マッピングから対応する入力項目名を取得
                     input_field = mapping[header]
