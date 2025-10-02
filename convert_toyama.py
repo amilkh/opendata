@@ -8,7 +8,7 @@ from datetime import datetime
 def convert_satisfaction_to_number(satisfaction_str):
     """
     満足度の文字列を数値に変換
-    大いに満足=5, 満足=4, どちらでもない=3, 不満=2, 大いに不満=1
+    大いに満足=5, 満足=4, 普通=3, 不満=2, 大いに不満=1
     """
     if not satisfaction_str or satisfaction_str.strip() == "":
         return ""
@@ -18,7 +18,7 @@ def convert_satisfaction_to_number(satisfaction_str):
     satisfaction_mapping = {
         "大いに満足": 5,
         "満足": 4,
-        "どちらでもない": 3,
+        "普通": 3,
         "不満": 2,
         "大いに不満": 1
     }

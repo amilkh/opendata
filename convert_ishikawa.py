@@ -53,6 +53,9 @@ def remove_unwanted_linebreaks(input_file_path):
         if content is None:
             raise UnicodeDecodeError("すべてのエンコーディングでデコードに失敗しました")
         
+        # タブ文字を半角スペースに置換
+        content = content.replace('\t', ' ')
+        
         # 不要な改行コードを削除（CRLFは保持）
         # \r\n (CRLF) を一時的に特殊文字に置換
         content = content.replace('\r\n', '___CRLF___')
@@ -460,6 +463,21 @@ def convert_ishikawa_csv():
                             survey_date = row.get(survey_date_field, "") if survey_date_field else ""
                             # 年代を計算
                             value = calculate_age_group(value, survey_date)
+                        # 「自由意見」の場合は2つのフィールドを結合
+                        elif header == "自由意見":
+                            # 2つのフィールドの値を取得
+                            field1 = row.get("あなたが求めている石川県の飲食、土産、アクティビティについて、ご自由にご意見をお聞かせください。(※必須項目です。無ければ「特になし」とご記入ください)", "")
+                            field2 = row.get("今回の旅行またはお出かけにおいて、特に人に薦めたいと感じたものとその理由について具体的に教えてください。", "")
+                            
+                            # 両方のフィールドが存在する場合は半角スペースで結合
+                            if field1 and field2:
+                                value = f"{field1} {field2}"
+                            elif field1:
+                                value = field1
+                            elif field2:
+                                value = field2
+                            else:
+                                value = ""
                         
                         output_row.append(value)
                     else:
