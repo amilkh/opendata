@@ -213,16 +213,17 @@ python convert_fukui.py
 
 ## ライセンス
 
-この観光アンケートデータ集約プログラムは以下の著作物を改変して利用しています。
+- [CC-BY（表示）](https://creativecommons.org/licenses/by/4.0/) 北陸インバウンド観光DX・データコンソーシアム 
 
-出典元
+- 出典元を記載いただければどなたでも自由にお使いいただけます。
 
-- 富山県のデータについて： [富山県データ連携基盤CKAN 富山県観光ウェブアンケートデータ](https://ckan.tdcp.pref.toyama.jp/dataset/kanko_data)、富山県、クリエイティブ・コ
-モンズ・ライセンス・CCZero 表示（https://opendefinition.org/licenses/cc-zero/）
+## 出典元
 
-- 石川県のデータについて： [いしかわ観光QRアンケートデータ-集約データ-表形式データ-全エリア](https://sites.google.com/view/milli-ishikawa-pref/data)、石川県、クリエイティブ・コ
-モンズ・ライセンス 表示 2.1（http://creativecommons.org/licenses/by/2.1/jp/）
+（この観光アンケートデータ集約プログラムは以下の著作物を改変して利用しています。）
 
-- 福井県のデータについて：[福井県観光データシステム「FTAS」により公開されたオープンデータ](https://github.com/code4fukui/fukui-kanko-survey)、福井県観光連盟、クリエイティブ・コ
-モンズ・ライセンス 表示（https://creativecommons.org/licenses/by/4.0/）
+- 富山県のデータについて： [富山県データ連携基盤CKAN 富山県観光ウェブアンケートデータ](https://ckan.tdcp.pref.toyama.jp/dataset/kanko_data)、富山県、[CC-BY（表示）](https://opendefinition.org/licenses/cc-by/)
+
+- 石川県のデータについて： [いしかわ観光QRアンケートデータ-集約データ-表形式データ-全エリア](https://sites.google.com/view/milli-ishikawa-pref/data)、石川県、[CC-BY（表示） 2.1](http://creativecommons.org/licenses/by/2.1/jp/)
+
+- 福井県のデータについて：[福井県観光データシステム「FTAS」により公開されたオープンデータ](https://github.com/code4fukui/fukui-kanko-survey)、福井県観光連盟、[CC-BY（表示）](https://creativecommons.org/licenses/by/4.0/)
 
