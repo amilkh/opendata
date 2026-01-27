@@ -1,0 +1,65 @@
+name: Run Python Survey Processing
+
+on:
+  schedule:
+    # 毎日午前6時（日本時間）に実行（UTC 21時 = JST 6時）
+    - cron: "0 21 * * *"
+  workflow_dispatch:  # 手動実行も可能にする
+
+jobs:
+  process-survey:
+    runs-on: ubuntu-latest
+    
+    # 書き込み権限を付与
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # 書き込み権限を有効化
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+        
+    - name: Run survey processing
+      run: |
+        python merge_survey.py
+        
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    
+    - name: Commit and push changes
+      run: |
+        # マージ後のCSVファイル、変換後のCSVファイル、ダウンロードした入力CSVファイルをステージング
+        git add output_merge/merged_survey.csv
+        git add output/toyama/toyama_converted.csv
+        git add output/ishikawa/ishikawa_converted.csv
+        git add output/fukui/fukui_converted.csv
+        git add input/fukui/fukui.csv
+        git add input/ishikawa/ishikawa.csv
+        git add input/toyama/toyama.csv
+        # 変更がある場合のみコミット
+        if git diff --staged --quiet; then
+          echo "変更がありません。コミットをスキップします。"
+        else
+          git commit -m "[automated daily update]Update survey CSV files (merged and input data)"
+          git push
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload merged CSV (artifact)
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: merged-survey-csv
+        path: output_merge/merged_survey.csv
+        retention-days: 30
