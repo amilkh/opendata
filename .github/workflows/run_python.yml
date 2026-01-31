@@ -48,7 +48,8 @@ jobs:
         git add input/ishikawa/ishikawa.csv
         git add input/toyama/toyama.csv
         # input/fukui/fukui.csvは50MBを超える可能性があるため、pushしない。年ごとのファイルのみpush
-        git add input/fukui/fukui_*.csv
+        # fukui_*.csvの*部分は数値のみを許可（正規表現でフィルタリング）
+        find input/fukui -type f -name 'fukui_*.csv' | grep -E 'fukui_[0-9]+\.csv$' | xargs git add || true
         # 変更がある場合のみコミット
         if git diff --staged --quiet; then
           echo "変更がありません。コミットをスキップします。"
