@@ -3,7 +3,7 @@ name: Run Python Survey Processing
 on:
   schedule:
     # 毎日午前6時（日本時間）に実行（UTC 21時 = JST 6時）
-    - cron: "0 21 * * *"
+    - cron: '0 21 * * *'
   workflow_dispatch:  # 手動実行も可能にする
 
 jobs:
@@ -38,19 +38,22 @@ jobs:
     
     - name: Commit and push changes
       run: |
-        # マージ後のCSVファイル、変換後のCSVファイル、ダウンロードした入力CSVファイルをステージング
-        git add output_merge/merged_survey.csv
-        git add output/toyama/toyama_converted.csv
-        git add output/ishikawa/ishikawa_converted.csv
-        git add output/fukui/fukui_converted.csv
-        git add input/fukui/fukui.csv
+        # 年ごとに分割されたCSVファイル、変換後のCSVファイル、ダウンロードした入力CSVファイルをステージング
+        # merged_survey.csvは50MBを超える可能性があるため、pushしない（年ごとの分割ファイルのみpush）
+        git add output_merge/merged_survey_*.csv
+        # 各県の変換後CSVファイルも50MBを超える可能性があるため、年ごとの分割ファイルのみpush
+        git add output/toyama/toyama_converted_*.csv
+        git add output/ishikawa/ishikawa_converted_*.csv
+        git add output/fukui/fukui_converted_*.csv
         git add input/ishikawa/ishikawa.csv
         git add input/toyama/toyama.csv
+        # input/fukui/fukui.csvは50MBを超える可能性があるため、pushしない。年ごとのファイルのみpush
+        git add input/fukui/fukui_*.csv
         # 変更がある場合のみコミット
         if git diff --staged --quiet; then
           echo "変更がありません。コミットをスキップします。"
         else
-          git commit -m "[automated daily update]Update survey CSV files (merged and input data)"
+          git commit -m "[automated daily update]Update survey CSV files (merged by year and input data)"
           git push
         fi
       env:

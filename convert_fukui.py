@@ -47,14 +47,20 @@ def process_fukui_csv(input_file_path):
         print("LFの削除完了")
         
         # 3. "000000"の前にCRLFを挿入（最初の"000000"は除く）
-        # 最初の"000000"を一時的に置換
-        content = content.replace('000000', '___FIRST_000000___', 1)
+        # 最初の"000000"の位置を特定
+        first_000000_pos = content.find('000000')
         
-        # 残りの"000000"の前にCRLFを挿入
-        content = content.replace('000000', '\r\n000000')
-        
-        # 最初の"000000"を元に戻す
-        content = content.replace('___FIRST_000000___', '000000')
+        if first_000000_pos != -1:
+            # 最初の"000000"より前の部分
+            before_first = content[:first_000000_pos + 6]  # "000000"を含む
+            # 最初の"000000"より後の部分
+            after_first = content[first_000000_pos + 6:]
+            
+            # 残りの部分で"000000"の前にCRLFを挿入
+            after_first = after_first.replace('000000', '\r\n000000')
+            
+            # 結合
+            content = before_first + after_first
         
         print("CRLFの挿入完了")
         print(f"処理後のファイルサイズ: {len(content)} 文字")
@@ -314,6 +320,10 @@ def convert_fukui_csv():
         
         # データ行を処理
         for row in rows:
+            # 空行をスキップ（すべての値が空の行）
+            if all(not str(v).strip() for v in row.values()):
+                continue
+            
             output_row = []
             
             for header in output_headers:

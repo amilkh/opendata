@@ -110,5 +110,14 @@ dmypy.json
 Thumbs.db
 
 # Project specific
-output/*.csv
-column_mapping.json
+output/toyama/toyama_converted.csv
+output/ishikawa/ishikawa_converted.csv
+output/fukui/fukui_converted.csv
+input/fukui/fukui.csv
+input/fukui/fukui_formatted.csv
+input/ishikawa/ishikawa_formatted.csv
+input/toyama/toyama_formatted.csv
+output_merge/merged_survey.csv
+output/toyama/toyama_converted.csv
+output/ishikawa/ishikawa_converted.csv
+output/fukui/fukui_converted.csv
